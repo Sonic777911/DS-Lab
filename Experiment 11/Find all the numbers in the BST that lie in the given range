@@ -1,0 +1,90 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct TreeNode {
+    int val;
+    struct TreeNode* left;
+    struct TreeNode* right;
+};
+
+struct TreeNode* newNode(int val) {
+    struct TreeNode* node = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+    node->val = val;
+    node->left = NULL;
+    node->right = NULL;
+    return node;
+}
+
+struct TreeNode* insert(struct TreeNode* root, int val) {
+    if (root == NULL)
+        return newNode(val);
+    if (val >= root->val)        // equal goes to RIGHT (as per problem)
+        root->right = insert(root->right, val);
+    else
+        root->left = insert(root->left, val);
+    return root;
+}
+
+int result[1000];
+int resultSize = 0;
+
+void dfs(struct TreeNode* node, int low, int high) {
+    if (node == NULL)
+        return;
+
+    if (node->val >= low && node->val <= high) {
+        result[resultSize++] = node->val;
+        dfs(node->left, low, high);
+        dfs(node->right, low, high);
+    }
+    else if (node->val < low) {
+        dfs(node->right, low, high);
+    }
+    else {
+        dfs(node->left, low, high);
+    }
+}
+
+void sortResult() {
+    for (int i = 0; i < resultSize - 1; i++)
+        for (int j = 0; j < resultSize - i - 1; j++)
+            if (result[j] > result[j+1]) {
+                int temp = result[j];
+                result[j] = result[j+1];
+                result[j+1] = temp;
+            }
+}
+
+int main() {
+    struct TreeNode* root = NULL;
+
+    int n;
+    printf("Enter number of nodes: ");
+    scanf("%d", &n);
+
+    printf("Enter %d node values: ", n);
+    for (int i = 0; i < n; i++) {
+        int val;
+        scanf("%d", &val);
+        root = insert(root, val);
+    }
+
+    int low, high;
+    printf("Enter low and high of range: ");
+    scanf("%d %d", &low, &high);
+
+    resultSize = 0;
+    dfs(root, low, high);
+    sortResult();
+
+    printf("Output: ");
+    if (resultSize == 0) {
+        printf("No elements found in range");
+    } else {
+        for (int i = 0; i < resultSize; i++)
+            printf("%d ", result[i]);
+    }
+    printf("\n");
+
+    return 0;
+}
